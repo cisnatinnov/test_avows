@@ -4,17 +4,27 @@ import { CTable, CTableHead, CTableHeaderCell, CTableBody, CTableRow, CTableData
 
 const UserList = ({ onEdit, refresh }) => {
     const [users, setUsers] = useState([]);
+    const [responseMessage, setResponseMessage] = useState("");
 
     useEffect(() => {
-        // fetchUsers list in here
+        $.ajax({
+            url: "http://127.0.0.1:5000/api/users",
+            type: "GET",
+            dataType: "json",
+            success: (response) => {
+                setUsers(response)
+            }
+        })
+
     }, [refresh]); // Fetch data when `refresh` prop changes
 
     const handleDelete = (id) => {
         $.ajax({
-            url: `/api/users/${id}`,
+            url: `http://127.0.0.1:5000/api/users/${id}`,
             type: 'DELETE',
-            success: () => {
+            success: (response) => {
                 setUsers(users.filter(user => user.id !== id));
+                setResponseMessage(response.message);
             },
             error: (xhr, status, error) => {
                 console.error('Error:', error);
@@ -25,6 +35,7 @@ const UserList = ({ onEdit, refresh }) => {
     return (
         <div className="container mt-5">
             <h2>User List</h2>
+            {responseMessage && <p>{responseMessage}</p>}
             <CTable>
                 <CTableHead>
                     <CTableRow>

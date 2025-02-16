@@ -9,9 +9,14 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
         age: '',
         bod: ''
     });
+    const [id, setId] = useState("");
+    const [responseMessage, setResponseMessage] = useState("");
+    const [label, setLabel] = useState("Create User");
 
     useEffect(() => {
         if (selectedUser) {
+            setLabel('Update User')
+            setId(selectedUser.id)
             setFormData({
                 name: selectedUser.name,
                 email: selectedUser.email,
@@ -19,6 +24,7 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
                 bod: selectedUser.bod 
             });
         } else {
+            setLabel('Create User')
             resetForm();
         }
     }, [selectedUser]);
@@ -32,7 +38,44 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // please submit from url backend
+        onFormSubmit();
+        if (label === 'Update User') {
+            $.ajax({
+                url: `http://127.0.0.1:5000/api/users/${id}`,
+                method: "PUT",
+                data: JSON.stringify(formData),
+                contentType: "application/json",
+                dataType: "json",
+                success: (response) => {
+                    setResponseMessage(response.message); // Handle success response
+                    resetForm();
+                    onSuccess()
+                },
+                error: (xhr, status, error) => {
+                    console.error("API request failed:", error);
+                    setResponseMessage("Error submitting data!");
+                }
+            })
+        }
+        else {
+            delete formData.id
+            $.ajax({
+                url: "http://127.0.0.1:5000/api/users",
+                method: "POST",
+                data: JSON.stringify(formData),
+                contentType: "application/json",
+                dataType: "json",
+                success: (response) => {
+                    setResponseMessage(response.message); // Handle success response
+                    resetForm();
+                    onSuccess()
+                },
+                error: (xhr, status, error) => {
+                    console.error("API request failed:", error);
+                    setResponseMessage("Error submitting data!");
+                }
+            })
+        }
     };
 
     const resetForm = () => {
@@ -40,6 +83,7 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
             name: '',
             email: '',
             age: '',
+            bod: ''
         });
     };
 
@@ -50,7 +94,7 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
 
     return (
         <div className="container mt-5">
-            <h2>{selectedUser ? 'Edit User' : 'Create User'}</h2>
+            <h2>{label}</h2>
             <CForm onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <CFormLabel htmlFor="name">Name</CFormLabel>
@@ -98,8 +142,9 @@ const UserForm = ({ selectedUser, onFormSubmit, onReset, onSuccess }) => {
                     />
                 </div>
                 <CButton type="submit" color="primary">{selectedUser ? 'Update' : 'Submit'}</CButton>
-                <CButton type="button" color="secondary">Reset</CButton>
+                <CButton type="button" color="secondary" onClick={handleReset}>Reset</CButton>
             </CForm>
+            {responseMessage && <p>{responseMessage}</p>}
         </div>
     );
 };
