@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import UserForm from './components/UserForm';
 import UserList from './components/UserList';
+import Population from './components/Population';
 
 const App = () => {
     const [selectedUser, setSelectedUser] = useState(null);
@@ -29,6 +30,7 @@ const App = () => {
                 onSuccess={() => setRefreshList(prev => !prev)} // Pass the callback for list refresh
             />
             <UserList refresh={refreshList} onEdit={handleUserSelect} />
+            <Population />
         </div>
     );
 };

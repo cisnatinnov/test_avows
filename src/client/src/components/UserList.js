@@ -9,7 +9,7 @@ const UserList = ({ onEdit, refresh }) => {
     useEffect(() => {
         $.ajax({
             url: "http://127.0.0.1:5000/api/users",
-            type: "GET",
+            method: "GET",
             dataType: "json",
             success: (response) => {
                 setUsers(response)
